@@ -54,22 +54,27 @@ class _PokemonListPageState extends ConsumerState<PokemonListPage> {
             pinned: true,
             backgroundColor: Theme.of(context).colorScheme.surface,
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(60),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: TextField(
-                  onChanged: (value) => ref.read(pokemonSearchQueryProvider.notifier).state = value,
-                  decoration: InputDecoration(
-                    hintText: 'Search Pokémon by name or ID...',
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
+              preferredSize: const Size.fromHeight(120),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: TextField(
+                      onChanged: (value) => ref.read(pokemonSearchQueryProvider.notifier).state = value,
+                      decoration: InputDecoration(
+                        hintText: 'Search Pokémon by name or ID...',
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  _TypeFilterList(),
+                ],
               ),
             ),
           ),
@@ -136,6 +141,45 @@ class _PokemonListPageState extends ConsumerState<PokemonListPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TypeFilterList extends ConsumerWidget {
+  final List<String> types = const [
+    'normal', 'fire', 'water', 'grass', 'electric', 'ice', 
+    'fighting', 'poison', 'ground', 'flying', 'psychic', 
+    'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedType = ref.watch(pokemonTypeFilterProvider);
+
+    return SizedBox(
+      height: 50,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: types.length,
+        itemBuilder: (context, index) {
+          final type = types[index];
+          final isSelected = selectedType == type;
+          
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(type.toUpperCase(), style: const TextStyle(fontSize: 10)),
+              selected: isSelected,
+              onSelected: (selected) {
+                final newType = selected ? type : null;
+                ref.read(pokemonTypeFilterProvider.notifier).state = newType;
+                ref.read(pokemonListProvider.notifier).filterByType(newType);
+              },
+            ),
+          );
+        },
       ),
     );
   }

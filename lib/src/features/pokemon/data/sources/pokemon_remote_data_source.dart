@@ -5,6 +5,7 @@ import '../models/pokemon_short_model.dart';
 abstract class PokemonRemoteDataSource {
   Future<List<PokemonShortModel>> getPokemonList({int limit = 20, int offset = 0});
   Future<PokemonModel> getPokemonDetails(String urlOrId);
+  Future<List<PokemonShortModel>> getPokemonByType(String type);
 }
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
@@ -35,5 +36,12 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
     
     final response = await _client.get(path);
     return PokemonModel.fromJson(response.data);
+  }
+
+  @override
+  Future<List<PokemonShortModel>> getPokemonByType(String type) async {
+    final response = await _client.get('type/$type');
+    final results = response.data['pokemon'] as List;
+    return results.map((json) => PokemonShortModel.fromJson(json['pokemon'])).toList();
   }
 }

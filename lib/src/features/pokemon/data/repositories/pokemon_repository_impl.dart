@@ -38,4 +38,9 @@ class PokemonRepositoryImpl implements PokemonRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<List<PokemonShortModel>> getPokemonByType(String type) async {
+    return await _remoteDataSource.getPokemonByType(type);
+  }
 }
