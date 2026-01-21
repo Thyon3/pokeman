@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/pokemon_card.dart';
 import '../widgets/ui_states.dart';
 import '../providers/pokemon_list_provider.dart';
+import '../providers/pokemon_search_provider.dart';
 import './pokemon_detail_page.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -31,14 +32,16 @@ class _PokemonListPageState extends ConsumerState<PokemonListPage> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+            _scrollController.position.maxScrollExtent - 200 &&
+        ref.read(pokemonSearchQueryProvider).isEmpty) {
       ref.read(pokemonListProvider.notifier).loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final pokemonListAsync = ref.watch(pokemonListProvider);
+    final pokemonListAsync = ref.watch(pokemonSearchResultProvider);
+    final searchQuery = ref.watch(pokemonSearchQueryProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -50,11 +53,32 @@ class _PokemonListPageState extends ConsumerState<PokemonListPage> {
             floating: true,
             pinned: true,
             backgroundColor: Theme.of(context).colorScheme.surface,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(60),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: TextField(
+                  onChanged: (value) => ref.read(pokemonSearchQueryProvider.notifier).state = value,
+                  decoration: InputDecoration(
+                    hintText: 'Search Pokémon by name or ID...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
           pokemonListAsync.when(
-            data: (list) => SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverGrid(
+            data: (list) => list.isEmpty 
+              ? const SliverFillRemaining(child: PokemonEmptyWidget())
+              : SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.8,
