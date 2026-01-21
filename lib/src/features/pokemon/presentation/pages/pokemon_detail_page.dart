@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/pokemon.dart';
 import '../providers/pokemon_detail_provider.dart';
+import '../providers/pokemon_detail_provider.dart';
+import '../providers/favorites_provider.dart';
+import '../providers/team_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PokemonDetailPage extends ConsumerWidget {
@@ -43,6 +46,48 @@ class _PokemonDetailBody extends StatelessWidget {
           expandedHeight: 300,
           pinned: true,
           backgroundColor: typeColor,
+          actions: [
+            Consumer(
+              builder: (context, ref, child) {
+                final favorites = ref.watch(favoritesProvider);
+                final isFavorite = favorites.contains(pokemon.id.toString());
+                return IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    ref.read(favoritesProvider.notifier).toggleFavorite(pokemon.id.toString());
+                  },
+                );
+              },
+            ),
+            Consumer(
+              builder: (context, ref, child) {
+                final team = ref.watch(teamProvider);
+                final isInTeam = team.contains(pokemon.id.toString());
+                return IconButton(
+                  icon: Icon(
+                    isInTeam ? Icons.group : Icons.group_add,
+                    color: Colors.white,
+                  ),
+                  onPressed: () async {
+                    try {
+                      if (isInTeam) {
+                        await ref.read(teamProvider.notifier).removeFromTeam(pokemon.id.toString());
+                      } else {
+                        await ref.read(teamProvider.notifier).addToTeam(pokemon.id.toString());
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString())),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
             title: Text(
               pokemon.name.toUpperCase(),
