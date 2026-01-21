@@ -5,6 +5,7 @@ import '../../domain/entities/pokemon.dart';
 import '../providers/pokemon_detail_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/team_provider.dart';
+import '../../domain/utils/type_effectiveness.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PokemonDetailPage extends ConsumerWidget {
@@ -138,6 +139,13 @@ class _PokemonDetailBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _StatsList(stats: pokemon.stats, color: typeColor),
+                const SizedBox(height: 24),
+                const Text(
+                  'Weaknesses',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                _WeaknessList(types: pokemon.types),
               ],
             ),
           ),
@@ -263,5 +271,74 @@ class _StatsList extends StatelessWidget {
         ),
       )).toList(),
     );
+  }
+}
+
+class _WeaknessList extends StatelessWidget {
+  final List<String> types;
+  const _WeaknessList({required this.types});
+
+  @override
+  Widget build(BuildContext context) {
+    Map<String, double> weaknesses = {};
+    const allTypes = ['normal', 'fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'];
+    
+    for (var attackerType in allTypes) {
+      double multiplier = 1.0;
+      for (var defenderType in types) {
+        multiplier *= _getMultiplier(attackerType, defenderType);
+      }
+      if (multiplier > 1.0) {
+        weaknesses[attackerType] = multiplier;
+      }
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: weaknesses.entries.map((e) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: _getTypeColor(e.key).withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _getTypeColor(e.key)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(e.key.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 4),
+            Text('x${e.value.toStringAsFixed(0)}', style: const TextStyle(fontSize: 10)),
+          ],
+        ),
+      )).toList(),
+    );
+  }
+
+  double _getMultiplier(String attacker, String defender) {
+    return TypeEffectiveness.getEffectiveness([attacker])[defender] ?? 1.0;
+  }
+
+  Color _getTypeColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'fire': return Colors.orange;
+      case 'water': return Colors.blue;
+      case 'grass': return Colors.green;
+      case 'electric': return Colors.yellow.shade700;
+      case 'psychic': return Colors.pink;
+      case 'ice': return Colors.cyan;
+      case 'dragon': return Colors.indigo;
+      case 'ghost': return Colors.purple;
+      case 'poison': return Colors.deepPurple;
+      case 'ground': return Colors.brown;
+      case 'rock': return Colors.grey.shade700;
+      case 'bug': return Colors.lightGreen;
+      case 'fighting': return Colors.red.shade900;
+      case 'normal': return Colors.grey;
+      case 'steel': return Colors.blueGrey;
+      case 'fairy': return Colors.pinkAccent;
+      case 'dark': return Colors.black87;
+      default: return Colors.blueGrey;
+    }
   }
 }
