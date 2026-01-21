@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../network/dio_client.dart';
 import '../database/local_storage.dart';
 import '../../features/pokemon/data/repositories/pokemon_repository_impl.dart';
+import '../../features/pokemon/data/sources/pokemon_local_data_source.dart';
 import '../../features/pokemon/data/sources/pokemon_remote_data_source.dart';
 import '../../features/pokemon/domain/repositories/pokemon_repository.dart';
 import '../../features/pokemon/domain/usecases/get_pokemon_details.dart';
@@ -12,6 +13,7 @@ final locator = GetIt.instance;
 
 Future<void> initDependencies() async {
   // External
+  await PokemonLocalDataSourceImpl.init();
   final sharedPreferences = await SharedPreferences.getInstance();
   locator.registerLazySingleton(() => sharedPreferences);
   locator.registerLazySingleton(() => DioClient());
@@ -21,10 +23,13 @@ Future<void> initDependencies() async {
   locator.registerLazySingleton<PokemonRemoteDataSource>(
     () => PokemonRemoteDataSourceImpl(locator()),
   );
+  locator.registerLazySingleton<PokemonLocalDataSource>(
+    () => PokemonLocalDataSourceImpl(),
+  );
 
   // Repositories
   locator.registerLazySingleton<PokemonRepository>(
-    () => PokemonRepositoryImpl(locator()),
+    () => PokemonRepositoryImpl(locator(), locator()),
   );
 
   // Use Cases
