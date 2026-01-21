@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../domain/entities/pokemon.dart';
-import '../providers/pokemon_detail_provider.dart';
 import '../providers/pokemon_detail_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/team_provider.dart';
@@ -109,10 +109,12 @@ class _PokemonDetailBody extends StatelessWidget {
                 Center(
                   child: Hero(
                     tag: 'pokemon-${pokemon.id}',
-                    child: Image.network(
-                      pokemon.imageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: pokemon.imageUrl,
                       height: 200,
                       fit: BoxFit.contain,
+                      placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+                      errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white),
                     ),
                   ),
                 ),
