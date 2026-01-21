@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/pokemon_card.dart';
 import '../providers/pokemon_list_provider.dart';
+import './pokemon_detail_page.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class PokemonListPage extends ConsumerStatefulWidget {
@@ -67,7 +68,15 @@ class _PokemonListPageState extends ConsumerState<PokemonListPage> {
                     return PokemonCard(
                       pokemon: list[index],
                       onTap: () {
-                        // Navigate to detail
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PokemonDetailPage(
+                              pokemonId: list[index].id.toString(),
+                              pokemonName: list[index].name,
+                            ),
+                          ),
+                        );
                       },
                     );
                   },
