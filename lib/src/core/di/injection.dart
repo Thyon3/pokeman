@@ -5,6 +5,7 @@ import '../database/local_storage.dart';
 import '../../features/pokemon/data/repositories/pokemon_repository_impl.dart';
 import '../../features/pokemon/data/sources/pokemon_remote_data_source.dart';
 import '../../features/pokemon/domain/repositories/pokemon_repository.dart';
+import '../../features/pokemon/domain/usecases/get_pokemon_list.dart';
 
 final locator = GetIt.instance;
 
@@ -24,4 +25,7 @@ Future<void> initDependencies() async {
   locator.registerLazySingleton<PokemonRepository>(
     () => PokemonRepositoryImpl(locator()),
   );
+
+  // Use Cases
+  locator.registerLazySingleton(() => GetPokemonList(locator()));
 }
