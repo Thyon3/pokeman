@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/pokemon_card.dart';
+import '../widgets/ui_states.dart';
 import '../providers/pokemon_list_provider.dart';
 import './pokemon_detail_page.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -85,7 +86,10 @@ class _PokemonListPageState extends ConsumerState<PokemonListPage> {
               ),
             ),
             error: (err, stack) => SliverFillRemaining(
-              child: Center(child: Text('Error: $err')),
+              child: PokemonErrorWidget(
+                message: err.toString(),
+                onRetry: () => ref.refresh(pokemonListProvider),
+              ),
             ),
             loading: () => SliverPadding(
               padding: const EdgeInsets.all(16),
